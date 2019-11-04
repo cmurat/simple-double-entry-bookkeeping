@@ -3,11 +3,13 @@ package per.cmurat.other.revolut.accounting.model;
 import per.cmurat.other.revolut.db.Entity;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 public class Transaction extends Entity {
     private AssetAccount debitAccount;
     private AssetAccount creditAccount;
     private BigDecimal amount;
+    private LocalDateTime dateTime;
 
     public AssetAccount getDebitAccount() {
         return debitAccount;
@@ -31,5 +33,13 @@ public class Transaction extends Entity {
 
     public void setAmount(final BigDecimal amount) {
         this.amount = amount;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    public void setDateTime(final LocalDateTime dateTime) {
+        this.dateTime = dateTime;
     }
 }
