@@ -29,7 +29,7 @@ public class AssetAccount extends Entity {
         BigDecimal newBalance = sub(this.getBalance(), amount);
 
         if (newBalance.signum() == -1 && newBalance.signum() == -1) {
-            throw new InsufficientBalanceException("Asset account doesn't have sufficient balance. Current balance: " + readableScale(amount).toPlainString());
+            throw new InsufficientBalanceException("Asset account doesn't have sufficient balance. Current balance: " + readableScale(balance).toPlainString());
         }
 
         this.setBalance(newBalance);
