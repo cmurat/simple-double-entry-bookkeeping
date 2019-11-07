@@ -2,6 +2,7 @@ package per.cmurat.other.revolut.accounting.service;
 
 import io.vavr.control.Try;
 import per.cmurat.other.revolut.LockUtils;
+import per.cmurat.other.revolut.accounting.exception.AccountNotFoundException;
 import per.cmurat.other.revolut.accounting.model.AssetAccount;
 import per.cmurat.other.revolut.accounting.model.AssetAccountRepository;
 import per.cmurat.other.revolut.accounting.model.Transaction;
@@ -11,7 +12,7 @@ import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-import static com.sun.tools.javac.util.Assert.checkNonNull;
+import static per.cmurat.other.revolut.AssertionUtils.checkNotNull;
 
 /**
  * This service is used for managing accounts doing transactions between them.
@@ -39,6 +40,7 @@ public class AccountingService {
      * @return Newly created and stored account object.
      */
     public AssetAccount createAccount(BigDecimal balance) {
+        checkNotNull(balance, "Balance cannot be null");
         AssetAccount account = new AssetAccount();
         account.setBalance(balance);
 
@@ -49,14 +51,18 @@ public class AccountingService {
      * Validates a transaction by checking the existence of accounts. If the accounts exist,
      * balances of accounts are checked to make sure transaction is doable.
      */
-    public Try validate(final long creditAccountId, final long debitAccountId, final BigDecimal amount) {
-        return LockUtils.tryInLock(
+    public void validate(final long creditAccountId, final long debitAccountId, final BigDecimal amount) throws Throwable {
+        Try t = LockUtils.tryInLock(
                 lockService.getLock(getLockNameForAccount(creditAccountId)),
                 () -> LockUtils.tryInLock(
                         lockService.getLock(getLockNameForAccount(debitAccountId)),
                         () -> doValidate(creditAccountId, debitAccountId, amount)
                 )
         ).get();
+
+        if (t.isFailure()) {
+            throw t.getCause();
+        }
     }
 
     /**
@@ -104,7 +110,7 @@ public class AccountingService {
         final AssetAccount creditAccount = getAccount(creditAccountId);
         final AssetAccount debitAccount = getAccount(debitAccountId);
 
-        Transaction transaction = new Transaction();
+        final Transaction transaction = new Transaction();
         transaction.setCreditAccount(creditAccount);
         transaction.setDebitAccount(debitAccount);
         transaction.setAmount(amount);
@@ -122,7 +128,11 @@ public class AccountingService {
     }
 
     public AssetAccount getAccount(final long id) {
-        return checkNonNull(accountRepository.findById(id), "Account not found. Account id: " + id);
+        final AssetAccount account = accountRepository.findById(id);
+        if (account == null) {
+            throw new AccountNotFoundException("Account not found. Account id: " + id);
+        }
+        return account;
     }
 
     private String getLockNameForAccount(long accountId) {

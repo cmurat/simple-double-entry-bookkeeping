@@ -6,6 +6,7 @@ import per.cmurat.other.revolut.db.Entity;
 import java.math.BigDecimal;
 
 import static per.cmurat.other.revolut.accounting.MathUtils.add;
+import static per.cmurat.other.revolut.accounting.MathUtils.readableScale;
 import static per.cmurat.other.revolut.accounting.MathUtils.sub;
 
 public class AssetAccount extends Entity {
@@ -28,7 +29,7 @@ public class AssetAccount extends Entity {
         BigDecimal newBalance = sub(this.getBalance(), amount);
 
         if (newBalance.signum() == -1 && newBalance.signum() == -1) {
-            throw new InsufficientBalanceException();
+            throw new InsufficientBalanceException("Asset account doesn't have sufficient balance. Current balance: " + readableScale(amount).toPlainString());
         }
 
         this.setBalance(newBalance);

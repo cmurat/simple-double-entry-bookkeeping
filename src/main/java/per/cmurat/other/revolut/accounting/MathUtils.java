@@ -5,6 +5,8 @@ import java.math.BigInteger;
 import java.math.MathContext;
 import java.util.Collection;
 
+import static java.math.BigDecimal.ROUND_FLOOR;
+
 public class MathUtils {
     public static final MathContext MATH_CONTEXT = MathContext.DECIMAL128;
 
@@ -14,5 +16,9 @@ public class MathUtils {
 
     public static BigDecimal sub(BigDecimal a, BigDecimal b) {
         return a.subtract(b, MATH_CONTEXT);
+    }
+
+    public static BigDecimal readableScale(BigDecimal bd) {
+        return bd.setScale(2, ROUND_FLOOR);
     }
 }
