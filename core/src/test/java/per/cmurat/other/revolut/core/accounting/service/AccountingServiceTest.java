@@ -135,6 +135,9 @@ class AccountingServiceTest {
         lenient().when(lockService.getLock(anyString())).thenReturn(new ReentrantLock());
         lenient().when(lockService.getLock(anyString())).thenReturn(new ReentrantLock());
 
+        when(creditAccount.clone()).thenReturn(creditAccount);
+        when(debitAccount.clone()).thenReturn(debitAccount);
+
         tested.validate(creditAccountId, debitAccountId, amount);
 
         verify(accountRepository, times(1)).findById(creditAccountId);
@@ -213,7 +216,7 @@ class AccountingServiceTest {
         final BigDecimal balance = new BigDecimal("10");
 
         final long creditAccountId = 1L;
-        final AssetAccount creditAccount = mock(AssetAccount.class);
+        final AssetAccount creditAccount = new AssetAccount();
         creditAccount.setBalance(balance);
 
         //This latch is for making the second thread wait until the first thread can acquire the locks.
@@ -237,11 +240,16 @@ class AccountingServiceTest {
                 }
                 super.debit(amount);
             }
+
+            @Override
+            public AssetAccount clone() {
+                return this;
+            }
         };
         debitAccount1.setBalance(balance);
 
         final long debitAccountId2 = 3L;
-        final AssetAccount debitAccount2 = mock(AssetAccount.class);
+        final AssetAccount debitAccount2 = new AssetAccount();
         debitAccount2.setBalance(balance);
 
         lenient().when(accountRepository.findById(creditAccountId)).thenReturn(creditAccount);

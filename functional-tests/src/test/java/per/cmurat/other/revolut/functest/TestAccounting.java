@@ -14,7 +14,6 @@ import java.math.BigDecimal;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static per.cmurat.other.revolut.core.rest.RestMapper.STATUS_BAD_REQUEST;
-import static per.cmurat.other.revolut.core.rest.RestMapper.STATUS_INTERNAL_SERVER_ERROR;
 import static per.cmurat.other.revolut.core.rest.RestMapper.STATUS_OK;
 
 class TestAccounting {
