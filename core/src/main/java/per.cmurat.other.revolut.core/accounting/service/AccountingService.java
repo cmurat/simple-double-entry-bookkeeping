@@ -82,8 +82,8 @@ public class AccountingService {
      * Ideally, this method should be called after acquiring locks for both of the accounts.
      */
     private void doValidate(final long creditAccountId, final long debitAccountId, final BigDecimal amount) {
-        final AssetAccount creditAccount = getAccount(creditAccountId);
-        final AssetAccount debitAccount = getAccount(debitAccountId);
+        final AssetAccount creditAccount = getAccount(creditAccountId).clone();
+        final AssetAccount debitAccount = getAccount(debitAccountId).clone();
 
         creditAccount.credit(amount);
         debitAccount.debit(amount);

@@ -1,5 +1,6 @@
 package per.cmurat.other.revolut.core.rest.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 
 import java.math.BigDecimal;
@@ -9,7 +10,9 @@ public class TransactionDto {
     private long sendingAccountId;
     private long receivingAccountId;
     private BigDecimal amount;
+
     @JsonSerialize(using = LocalDateTimeSerializer.class)
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     private LocalDateTime dateTime;
 
     public long getSendingAccountId() {

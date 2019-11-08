@@ -34,4 +34,13 @@ public class AssetAccount extends Entity {
 
         this.setBalance(newBalance);
     }
+
+    @Override
+    public AssetAccount clone() {
+        final AssetAccount that = new AssetAccount();
+        that.setId(this.getId());
+        that.setBalance(new BigDecimal(this.balance.toPlainString()));
+
+        return that;
+    }
 }

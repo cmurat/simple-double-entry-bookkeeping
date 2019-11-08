@@ -8,6 +8,7 @@ import per.cmurat.other.revolut.core.rest.dto.AssetAccountDto;
 import per.cmurat.other.revolut.core.rest.dto.TransactionDto;
 import spark.Request;
 import spark.Response;
+import spark.Spark;
 
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -18,12 +19,13 @@ import static spark.Spark.get;
 import static spark.Spark.path;
 import static spark.Spark.post;
 import static spark.Spark.put;
+import static spark.Spark.stop;
 
 public class RestMapper {
 
-    private static final int STATUS_CREATED = 200;
-    private static final int STATUS_BAD_REQUEST = 400;
-    private static final int STATUS_INTERNAL_SERVER_ERROR = 500;
+    public static final int STATUS_OK = 200;
+    public static final int STATUS_BAD_REQUEST = 400;
+    public static final int STATUS_INTERNAL_SERVER_ERROR = 500;
 
     private static final String EMPTY_BODY = "";
 
@@ -37,25 +39,28 @@ public class RestMapper {
             put("/account", (request, response) -> {
                 final AssetAccountDto requestDto = mapper.readValue(request.body().toString(), AssetAccountDto.class);
                 final AssetAccount account = accountingController.createAccount(requestDto.getBalance());
-                response.status(STATUS_CREATED);
+                response.status(STATUS_OK);
                 return mapper.writeValueAsString(mapToDto(account));
             });
 
             get("/account/:id", (request, response) -> {
                 final String id = request.params(":id");
                 final AssetAccount account = accountingController.getAccount(id);
+                response.status(STATUS_OK);
                 return mapper.writeValueAsString(mapToDto(account));
             });
 
             post("/validateTransfer", (request, response) -> {
                 final TransactionDto requestDto = mapper.readValue(request.body().toString(), TransactionDto.class);
                 accountingController.validateTransfer(requestDto.getSendingAccountId(), requestDto.getReceivingAccountId(), requestDto.getAmount());
+                response.status(STATUS_OK);
                 return EMPTY_BODY;
             });
 
             post("/processTransfer", (request, response) -> {
                 final TransactionDto requestDto = mapper.readValue(request.body().toString(), TransactionDto.class);
                 final Transaction transaction = accountingController.processTransfer(requestDto.getSendingAccountId(), requestDto.getReceivingAccountId(), requestDto.getAmount());
+                response.status(STATUS_OK);
                 return mapper.writeValueAsString(mapToDto(transaction));
             });
         });
@@ -65,13 +70,17 @@ public class RestMapper {
         exception(IllegalArgumentException.class, this::handleIllegalArgumentException);
     }
 
+    public void stopServer() {
+        stop();
+    }
+
     private void handleException(Exception exception, Request request, Response response) {
         handleThrowable(exception, request, response);
     }
 
     private void handleRuntimeException(RuntimeException exception, Request request, Response response) {
-        if (exception.getCause() != null) {
-            handleThrowable(exception.getCause(), request, response);
+        if (exception.getCause() != null && exception.getCause() instanceof IllegalArgumentException) {
+            handleIllegalArgumentException((IllegalArgumentException) exception.getCause(), request, response);
         } else {
             handleThrowable(exception, request, response);
         }
