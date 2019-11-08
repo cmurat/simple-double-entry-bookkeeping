@@ -22,7 +22,7 @@ public class AccountingController {
         return accountingService.getAccount(checkAndParseAccountId(accountId));
     }
 
-    public void validateTransfer(final long sendingAccountId, final long receivingAccountId, BigDecimal amount) {
+    public void validateTransfer(final long sendingAccountId, final long receivingAccountId, final BigDecimal amount) {
         checkAmountParameter(amount);
         try {
             accountingService.validate(sendingAccountId, receivingAccountId, amount);
@@ -33,12 +33,12 @@ public class AccountingController {
         }
     }
 
-    public Transaction processTransfer(final long sendingAccountId, final long receivingAccountId, BigDecimal amount) {
+    public Transaction processTransfer(final long sendingAccountId, final long receivingAccountId, final BigDecimal amount) {
         checkAmountParameter(amount);
         return accountingService.transfer(sendingAccountId, receivingAccountId, amount);
     }
 
-    private void checkBalanceParameter(BigDecimal balance) {
+    private void checkBalanceParameter(final BigDecimal balance) {
         if (balance == null) {
             throw new IllegalArgumentException("Balance cannot be null");
         }
@@ -48,7 +48,7 @@ public class AccountingController {
         }
     }
 
-    private void checkAmountParameter(BigDecimal amount) {
+    private void checkAmountParameter(final BigDecimal amount) {
         if (amount == null) {
             throw new IllegalArgumentException("Amount cannot be null");
         }
@@ -58,7 +58,7 @@ public class AccountingController {
         }
     }
 
-    private long checkAndParseAccountId(String accountIdStr) {
+    private long checkAndParseAccountId(final String accountIdStr) {
         if (StringUtils.isEmpty(accountIdStr)) {
             throw new IllegalArgumentException("Account ID must not be empty.");
         }

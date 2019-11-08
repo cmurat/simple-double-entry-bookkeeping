@@ -1,12 +1,15 @@
 package per.cmurat.other.revolut.core.db;
 
 import io.vavr.control.Try;
+import per.cmurat.other.revolut.core.AssertionUtils;
 import per.cmurat.other.revolut.core.LockUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.ReentrantLock;
+
+import static per.cmurat.other.revolut.core.AssertionUtils.checkNotNull;
 
 public abstract class Repository<T extends Entity> {
 
@@ -16,6 +19,7 @@ public abstract class Repository<T extends Entity> {
     private AtomicLong idCounter = new AtomicLong(0);
 
     public T store(T t) {
+        checkNotNull(t, "Cannot store null objects");
         assignId(t);
         store.put(t.getId(), t);
         return t;
