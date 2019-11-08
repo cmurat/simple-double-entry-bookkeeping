@@ -21,7 +21,7 @@ public abstract class Repository<T extends Entity> {
         return t;
     }
 
-    public final T findById(long id) {
+    public T findById(long id) {
         return store.get(id);
     }
 

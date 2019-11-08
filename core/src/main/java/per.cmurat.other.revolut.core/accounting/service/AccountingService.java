@@ -41,10 +41,23 @@ public class AccountingService {
      */
     public AssetAccount createAccount(BigDecimal balance) {
         checkNotNull(balance, "Balance cannot be null");
+
+        if (balance.signum() < 0) {
+            throw new IllegalArgumentException("Balance must be non-negative");
+        }
+
         AssetAccount account = new AssetAccount();
         account.setBalance(balance);
 
         return accountRepository.store(account);
+    }
+
+    public AssetAccount getAccount(final long id) {
+        final AssetAccount account = accountRepository.findById(id);
+        if (account == null) {
+            throw new AccountNotFoundException("Account not found. Account id: " + id);
+        }
+        return account;
     }
 
     /**
@@ -127,15 +140,8 @@ public class AccountingService {
         return transaction;
     }
 
-    public AssetAccount getAccount(final long id) {
-        final AssetAccount account = accountRepository.findById(id);
-        if (account == null) {
-            throw new AccountNotFoundException("Account not found. Account id: " + id);
-        }
-        return account;
-    }
-
-    private String getLockNameForAccount(long accountId) {
+    //Visible for testing
+    String getLockNameForAccount(long accountId) {
         return "Account-" + accountId;
     }
 }
