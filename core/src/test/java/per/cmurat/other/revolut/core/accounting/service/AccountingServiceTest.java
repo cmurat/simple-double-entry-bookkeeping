@@ -1,5 +1,6 @@
 package per.cmurat.other.revolut.core.accounting.service;
 
+import com.jayway.awaitility.Awaitility;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -271,15 +272,18 @@ class AccountingServiceTest {
             }
         });
 
-        //Wait until the second thread is ready to start.
-        startSecondFunctionLatch.await();
+        //Wait until the second thread is waiting on the lock.
+        Awaitility
+                .given()
+                .pollInterval(100L, TimeUnit.MILLISECONDS)
+                .atMost(2L, TimeUnit.SECONDS)
+                .until(creditAccountLock::hasQueuedThreads);
 
         assertFalse(first.isDone());
         assertFalse(second.isDone());
 
         //The first thread should have the lock and the second thread should be queued.
         assertTrue(creditAccountLock.isLocked());
-        assertTrue(creditAccountLock.hasQueuedThreads());
 
         //Assertions are done, we can release the first thread.
         finishFirstFunctionLatch.countDown();
