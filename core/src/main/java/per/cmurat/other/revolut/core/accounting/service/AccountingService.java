@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 import static per.cmurat.other.revolut.core.AssertionUtils.checkNotNull;
 
 /**
- * This service is used for managing accounts doing transactions between them.
+ * This service is used for managing accounts and making transfers between them.
  *
  * Validation can be done by calling {@link #validate(long, long, BigDecimal)}, before executing the
  * transaction by calling {@link #transfer(long, long, BigDecimal)}. However, if there are other operations
@@ -65,7 +65,8 @@ public class AccountingService {
      * balances of accounts are checked to make sure transaction is doable.
      */
     public void validate(final long creditAccountId, final long debitAccountId, final BigDecimal amount) throws Throwable {
-        Try t = LockUtils.tryInLock(
+        // TODO: 2019-11-15 cmurat Possible deadlock here.
+        final Try t = LockUtils.tryInLock(
                 lockService.getLock(getLockNameForAccount(creditAccountId)),
                 () -> LockUtils.tryInLock(
                         lockService.getLock(getLockNameForAccount(debitAccountId)),
@@ -100,7 +101,7 @@ public class AccountingService {
      * @return The resulting transaction
      */
     public Transaction transfer(final long creditAccountId, final long debitAccountId, final BigDecimal amount) {
-        Try<Transaction> t = LockUtils.tryInLock(
+        final Try<Transaction> t = LockUtils.tryInLock(
                 lockService.getLock(getLockNameForAccount(creditAccountId)),
                 () -> (Try<Transaction>) LockUtils.tryInLock(
                         lockService.getLock(getLockNameForAccount(debitAccountId)),

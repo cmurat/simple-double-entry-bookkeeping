@@ -16,17 +16,17 @@ public class AssetAccount extends Entity {
         return balance;
     }
 
-    public void setBalance(BigDecimal balance) {
+    public void setBalance(final BigDecimal balance) {
         this.balance = balance;
     }
 
-    public void debit(BigDecimal amount) {
-        BigDecimal newBalance = add(this.getBalance(), amount);
+    public void debit(final BigDecimal amount) {
+        final BigDecimal newBalance = add(this.getBalance(), amount);
         this.setBalance(newBalance);
     }
 
-    public void credit(BigDecimal amount) {
-        BigDecimal newBalance = sub(this.getBalance(), amount);
+    public void credit(final BigDecimal amount) {
+        final BigDecimal newBalance = sub(this.getBalance(), amount);
 
         if (newBalance.signum() == -1 && newBalance.signum() == -1) {
             throw new InsufficientBalanceException("Asset account doesn't have sufficient balance. Current balance: " + readableScale(balance).toPlainString());
