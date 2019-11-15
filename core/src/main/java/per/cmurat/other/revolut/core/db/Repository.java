@@ -18,20 +18,20 @@ public abstract class Repository<T extends Entity> {
     private final ReentrantLock lock = new ReentrantLock();
     private AtomicLong idCounter = new AtomicLong(0);
 
-    public T store(T t) {
+    public T store(final T t) {
         checkNotNull(t, "Cannot store null objects");
         assignId(t);
         store.put(t.getId(), t);
         return t;
     }
 
-    public T findById(long id) {
+    public T findById(final long id) {
         return store.get(id);
     }
 
-    private void assignId(T t) {
+    private void assignId(final T t) {
         if (t.getId() == null) {
-            Try result = LockUtils.tryInLock(lock, () -> {
+            final Try result = LockUtils.tryInLock(lock, () -> {
                 t.setId(idCounter.incrementAndGet());
             });
 

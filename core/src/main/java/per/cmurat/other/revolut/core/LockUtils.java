@@ -6,7 +6,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.locks.ReentrantLock;
 
 public class LockUtils {
-    public static <T> Try<T> tryInLock(ReentrantLock lock, Callable<T> c) {
+    public static <T> Try<T> tryInLock(final ReentrantLock lock, final Callable<T> c) {
         try {
             lock.lock();
             return Try.ofCallable(c);
@@ -17,7 +17,7 @@ public class LockUtils {
         }
     }
 
-    public static Try tryInLock(ReentrantLock lock, Runnable r) {
+    public static Try tryInLock(final ReentrantLock lock, final Runnable r) {
         try {
             lock.lock();
             return Try.runRunnable(r);

@@ -5,7 +5,7 @@ import com.google.inject.Injector;
 import per.cmurat.other.revolut.core.rest.RestMapper;
 
 public class App {
-    public static void main(String[] args) {
+    public static void main(final String[] args) {
         new App().start();
     }
 

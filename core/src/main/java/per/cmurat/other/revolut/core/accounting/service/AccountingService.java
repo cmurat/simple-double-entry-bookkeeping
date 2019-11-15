@@ -49,7 +49,7 @@ public class AccountingService {
             throw new IllegalArgumentException("Balance must be non-negative");
         }
 
-        AssetAccount account = new AssetAccount();
+        final AssetAccount account = new AssetAccount();
         account.setBalance(balance);
 
         return accountRepository.store(account);
@@ -124,7 +124,7 @@ public class AccountingService {
         return transaction;
     }
 
-    private <T> T doInLock(long firstAccountId, long secondAccountId, Supplier<T> supplier) throws Throwable {
+    private <T> T doInLock(final long firstAccountId, final long secondAccountId, final Supplier<T> supplier) throws Throwable {
         final PriorityQueue<String> lockNameQueue = new PriorityQueue<>();
         lockNameQueue.add(getLockNameForAccount(firstAccountId));
         lockNameQueue.add(getLockNameForAccount(secondAccountId));
@@ -145,7 +145,7 @@ public class AccountingService {
     }
 
     //Visible for testing
-    String getLockNameForAccount(long accountId) {
+    String getLockNameForAccount(final long accountId) {
         return "Account-" + accountId;
     }
 }

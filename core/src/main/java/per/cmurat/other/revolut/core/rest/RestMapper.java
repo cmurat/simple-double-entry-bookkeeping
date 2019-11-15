@@ -74,11 +74,11 @@ public class RestMapper {
         stop();
     }
 
-    private void handleException(Exception exception, Request request, Response response) {
+    private void handleException(final Exception exception, final Request request, final Response response) {
         handleThrowable(exception, request, response);
     }
 
-    private void handleRuntimeException(RuntimeException exception, Request request, Response response) {
+    private void handleRuntimeException(final RuntimeException exception, final Request request, final Response response) {
         if (exception.getCause() != null && exception.getCause() instanceof IllegalArgumentException) {
             handleIllegalArgumentException((IllegalArgumentException) exception.getCause(), request, response);
         } else {
@@ -86,12 +86,12 @@ public class RestMapper {
         }
     }
 
-    private void handleIllegalArgumentException(IllegalArgumentException exception, Request request, Response response) {
+    private void handleIllegalArgumentException(final IllegalArgumentException exception, final Request request, final Response response) {
         handleException(exception, request, response);
         response.status(STATUS_BAD_REQUEST);
     }
 
-    private void handleThrowable(Throwable exception, Request request, Response response) {
+    private void handleThrowable(final Throwable exception, final Request request, final Response response) {
         final String stackTrace = getStackTrace(exception);
         System.err.println(stackTrace);
         response.body(stackTrace);
@@ -104,7 +104,7 @@ public class RestMapper {
         return sw.toString();
     }
 
-    private TransactionDto mapToDto(Transaction transaction) {
+    private TransactionDto mapToDto(final Transaction transaction) {
         final TransactionDto dto = new TransactionDto();
         dto.setSendingAccountId(transaction.getCreditAccount().getId());
         dto.setReceivingAccountId(transaction.getDebitAccount().getId());
@@ -114,7 +114,7 @@ public class RestMapper {
         return dto;
     }
 
-    private AssetAccountDto mapToDto(AssetAccount account) {
+    private AssetAccountDto mapToDto(final AssetAccount account) {
         final AssetAccountDto dto = new AssetAccountDto();
         dto.setId(account.getId());
         dto.setBalance(readableScale(account.getBalance()));
