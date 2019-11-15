@@ -171,7 +171,7 @@ class AccountingServiceTest {
     }
 
     @Test
-    void transferShouldSucceed() {
+    void transferShouldSucceed() throws Throwable {
         final long creditAccountId = 1L;
         final AssetAccount creditAccount = mock(AssetAccount.class);
 

@@ -35,7 +35,13 @@ public class AccountingController {
 
     public Transaction processTransfer(final long sendingAccountId, final long receivingAccountId, final BigDecimal amount) {
         checkAmountParameter(amount);
-        return accountingService.transfer(sendingAccountId, receivingAccountId, amount);
+        try {
+            return accountingService.transfer(sendingAccountId, receivingAccountId, amount);
+        } catch (RuntimeException e) {
+            throw e;
+        } catch (Throwable t) {
+            throw new RuntimeException(t);
+        }
     }
 
     private void checkBalanceParameter(final BigDecimal balance) {

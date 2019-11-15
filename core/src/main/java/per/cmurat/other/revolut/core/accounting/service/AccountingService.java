@@ -11,6 +11,9 @@ import per.cmurat.other.revolut.core.accounting.model.TransactionRepository;
 import javax.inject.Inject;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.PriorityQueue;
+import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 
 import static per.cmurat.other.revolut.core.AssertionUtils.checkNotNull;
 
@@ -65,18 +68,10 @@ public class AccountingService {
      * balances of accounts are checked to make sure transaction is doable.
      */
     public void validate(final long creditAccountId, final long debitAccountId, final BigDecimal amount) throws Throwable {
-        // TODO: 2019-11-15 cmurat Possible deadlock here.
-        final Try t = LockUtils.tryInLock(
-                lockService.getLock(getLockNameForAccount(creditAccountId)),
-                () -> LockUtils.tryInLock(
-                        lockService.getLock(getLockNameForAccount(debitAccountId)),
-                        () -> doValidate(creditAccountId, debitAccountId, amount)
-                )
-        ).get();
-
-        if (t.isFailure()) {
-            throw t.getCause();
-        }
+        doInLock(creditAccountId, debitAccountId, () -> {
+            doValidate(creditAccountId, debitAccountId, amount);
+            return null;
+        });
     }
 
     /**
@@ -100,20 +95,8 @@ public class AccountingService {
      * @param amount Amount of money to transfer
      * @return The resulting transaction
      */
-    public Transaction transfer(final long creditAccountId, final long debitAccountId, final BigDecimal amount) {
-        final Try<Transaction> t = LockUtils.tryInLock(
-                lockService.getLock(getLockNameForAccount(creditAccountId)),
-                () -> (Try<Transaction>) LockUtils.tryInLock(
-                        lockService.getLock(getLockNameForAccount(debitAccountId)),
-                        () -> doTransfer(creditAccountId, debitAccountId, amount)
-                )
-        ).get();
-
-        if (t.isFailure()) {
-            throw new RuntimeException(t.getCause());
-        }
-
-        return t.get();
+    public Transaction transfer(final long creditAccountId, final long debitAccountId, final BigDecimal amount) throws Throwable {
+        return doInLock(creditAccountId, debitAccountId, () -> doTransfer(creditAccountId, debitAccountId, amount));
     }
 
     /**
@@ -139,6 +122,26 @@ public class AccountingService {
         accountRepository.store(debitAccount);
 
         return transaction;
+    }
+
+    private <T> T doInLock(long firstAccountId, long secondAccountId, Supplier<T> supplier) throws Throwable {
+        final PriorityQueue<String> lockNameQueue = new PriorityQueue<>();
+        lockNameQueue.add(getLockNameForAccount(firstAccountId));
+        lockNameQueue.add(getLockNameForAccount(secondAccountId));
+
+        final Try<T> t = LockUtils.tryInLock(
+                lockService.getLock(lockNameQueue.poll()),
+                () -> LockUtils.tryInLock(
+                        lockService.getLock(lockNameQueue.poll()),
+                        supplier::get
+                )
+        ).get();
+
+        if (t.isFailure()) {
+            throw t.getCause();
+        }
+
+        return t.get();
     }
 
     //Visible for testing
